@@ -9,7 +9,11 @@ const Home: NextPage = () => {
         features. It shall reveal its limits opposed to native mobile
         applications.
       </p>
-      <p>Following demonstrations are available</p>
+      <p>
+        High level overview of supported features is nicely presented on{" "}
+        <a href="https://whatwebcando.today">whatwecando.today</a>. Following
+        index leads to pages with demonstration of the features.
+      </p>
       <ul>
         <li>
           <Link href="/gps-tracking">GPS Tracking</Link> - ability to obtain

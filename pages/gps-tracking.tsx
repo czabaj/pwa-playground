@@ -131,6 +131,20 @@ const GPSTracking: NextPage = () => {
         permissions, but the Permission API is still new and currently not
         supported in Safari.
       </p>
+      <h2>Background geotracking</h2>
+      <p>
+        This is currently impossible, the page must be in foreground to use
+        geolocation API.
+      </p>
+      <p>
+        There is a{" "}
+        <a href="https://github.com/w3c/geolocation-sensor">
+          GeolocationSensor API
+        </a>{" "}
+        as a successor of geolocation API, which will allow background
+        geotracking. This API is in very early stage and not supported by any
+        browser.
+      </p>
       {!currentPosition ? (
         <div>Please approve the page for accessing the location data.</div>
       ) : (
