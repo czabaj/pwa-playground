@@ -1,11 +1,14 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 
-const positionOptions: PositionOptions = {
-  enableHighAccuracy: true,
-  timeout: 5000,
-  maximumAge: 0,
-};
+import {
+  Map,
+  Marker,
+  Polyline,
+  geoPositionToLatLng,
+  latLngsToBounds,
+} from "../components/GoogleMap";
+import classes from "./gps-tracking.module.scss";
 
 const useCurrentPosition = () => {
   const [currentPosition, setCurrentPosition] = useState<
@@ -19,7 +22,11 @@ const useCurrentPosition = () => {
       (error) => {
         console.error(`retrieving geolocation failed with an error:`, error);
       },
-      positionOptions
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      }
     );
   }, []);
   return currentPosition;
@@ -29,7 +36,9 @@ const useLatestPositions = () => {
   const [positions, setPositions] = useState<GeolocationPosition[]>([]);
   useEffect(() => {
     const watchId = navigator.geolocation.watchPosition((position) => {
-      setPositions((oldPositions) => oldPositions.concat(position));
+      setPositions((oldPositions) => {
+        return oldPositions.concat(position);
+      });
     });
     return () => {
       navigator.geolocation.clearWatch(watchId);
@@ -38,35 +47,70 @@ const useLatestPositions = () => {
   return positions;
 };
 
-const CurrentPosition = ({ position }: { position: GeolocationPosition }) => {
-  return (
-    <dl>
-      <dt>Latitude</dt>
-      <dd>{position.coords.latitude}</dd>
-      <dt>Longitude</dt>
-      <dd>{position.coords.longitude}</dd>
-    </dl>
-  );
-};
-
 const ContentPermissionGranted = ({
   position,
 }: {
   position: GeolocationPosition;
 }) => {
+  const currentLatLng = geoPositionToLatLng(position);
   const latestPositions = useLatestPositions();
+  const latestPositionsLatLngs = latestPositions.map(geoPositionToLatLng);
   return (
     <>
       <h3>Current position</h3>
-      <div>Your current location is</div>
-      <CurrentPosition position={position} />
+      <p>
+        The web geolocation API does not specify the source of the location
+        information.{" "}
+        <cite>
+          The Geolocation API defines a high-level interface to location
+          information associated only with the device hosting the
+          implementation, such as latitude and longitude. The API itself is
+          agnostic of the underlying location information sources. Common
+          sources of location information include Global Positioning System
+          (GPS) and location inferred from network signals such as IP address,
+          RFID, WiFi and Bluetooth MAC addresses, and GSM/CDMA cell IDs, as well
+          as user input. No guarantee is given that the API returns the device's
+          actual location. --
+          https://www.w3.org/2008/geolocation/PER-geolocation-API/#introduction
+        </cite>
+        On a device without GPS sensor the accuracy is unreliable.
+      </p>
+      <figure>
+        <figcaption>
+          Your position captured on the page start rendered in a map.
+        </figcaption>
+        <Map
+          center={currentLatLng}
+          style={{ blockSize: 300, inlineSize: 500 }}
+          zoom={10}
+        >
+          <Marker position={currentLatLng} />
+        </Map>
+      </figure>
       <h3>Watch for position changes</h3>
+
+      <figure>
+        <figcaption>You real-time position plotted onto the map</figcaption>
+        <Map
+          center={currentLatLng}
+          bounds={latLngsToBounds(latestPositionsLatLngs)}
+          style={{ blockSize: 300, inlineSize: 500 }}
+          zoom={17}
+        >
+          <Polyline
+            path={latestPositions.map(geoPositionToLatLng)}
+            strokeColor="#FF0000"
+            strokeOpacity={1}
+            strokeWeight={2}
+          />
+        </Map>
+      </figure>
       <p>
         The watch callback is invoked even when there is no change in location,
         the table bellow thus contain duplicated rows. The altitude, heading and
         speed is only measured on supported devices.
       </p>
-      <table>
+      <table className={classes.watchTable}>
         <caption>The list of captured location changes</caption>
         <thead>
           <tr>
@@ -81,9 +125,9 @@ const ContentPermissionGranted = ({
           </tr>
         </thead>
         <tbody>
-          {latestPositions.map((pos) => {
+          {latestPositions.map((pos, i) => {
             return (
-              <tr key={pos.timestamp}>
+              <tr key={i}>
                 <td>{pos.timestamp}</td>
                 <td>{pos.coords.latitude}</td>
                 <td>{pos.coords.longitude}</td>

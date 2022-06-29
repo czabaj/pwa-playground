@@ -11,14 +11,17 @@ const Home: NextPage = () => {
       </p>
       <p>
         High level overview of supported features is nicely presented on{" "}
-        <a href="https://whatwebcando.today">whatwecando.today</a>. Following
+        <a href="https://whatwebcando.today">whatwebcando.today</a>. Following
         index leads to pages with demonstration of the features.
       </p>
       <ul>
         <li>
-          <Link href="/gps-tracking">GPS Tracking</Link> - ability to obtain
-          user GPS coordinates, must obtain them real-time, as user moves and
-          must be able to work even when the tab or the browser is in background
+          <Link href="/gps-tracking">Geolocation</Link> - ability to obtain user
+          GPS coordinates.
+        </li>
+        <li>
+          <Link href="/gps-tracking">Barcode scan</Link> - ability to parse
+          barcodes from image (gallery) or directly from the camera.
         </li>
       </ul>
     </>
