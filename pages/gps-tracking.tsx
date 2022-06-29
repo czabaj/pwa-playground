@@ -69,8 +69,8 @@ const ContentPermissionGranted = ({
           sources of location information include Global Positioning System
           (GPS) and location inferred from network signals such as IP address,
           RFID, WiFi and Bluetooth MAC addresses, and GSM/CDMA cell IDs, as well
-          as user input. No guarantee is given that the API returns the device's
-          actual location. --
+          as user input. No guarantee is given that the API returns the
+          device&apos;s actual location. --
           https://www.w3.org/2008/geolocation/PER-geolocation-API/#introduction
         </cite>
         On a device without GPS sensor the accuracy is unreliable.

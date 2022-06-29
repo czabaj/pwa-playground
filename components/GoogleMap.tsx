@@ -89,6 +89,7 @@ export const Map = ({
   );
 };
 
+// eslint-disable-next-line react/display-name
 export const Marker = memo((options: google.maps.MarkerOptions) => {
   const [marker, setMarker] = useState<google.maps.Marker>();
 
@@ -105,6 +106,7 @@ export const Marker = memo((options: google.maps.MarkerOptions) => {
   return null;
 }, isEqual);
 
+// eslint-disable-next-line react/display-name
 export const Polyline = memo((options: google.maps.PolylineOptions) => {
   const [polyline, setPolyline] = useState<google.maps.Polyline>();
 
