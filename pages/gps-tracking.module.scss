@@ -1,0 +1,5 @@
+.watchTable {
+  & :where(td, th) {
+    padding-inline: 0.5rem;
+  }
+}

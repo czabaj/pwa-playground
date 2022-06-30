@@ -9,7 +9,7 @@ limits opposed to native mobile applications.
 - [ ] obtain requirements on barcode formats,
 - [ ] GPS tracking - must work even when the tab or browser is in the background,
 - [ ] push notifications - must work quickly and reliably,
-- [ ] taking pictures - capturing instant photos and also picking from photo library,
+- [ ] taking pictures - capturing instant photos and also picking from photo library, investigate possibility to send image to the PWA through mobile "share" mechanism,
 - [ ] offline support - ability to work event without network connection,
 - [ ] barcode decoding - not PWA related, but find the best approach to scan barcode from the photo,
 - [ ] offline maps - not PWA related, but check if there are some map SDK with offline support,
