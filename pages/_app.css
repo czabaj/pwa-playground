@@ -1,0 +1,34 @@
+html,
+body {
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  padding-block: 1.5rem;
+  padding-inline: 2rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+* {
+  max-inline-size: 60ch;
+}
+
+html,
+body,
+div,
+header,
+nav,
+main,
+footer {
+  max-inline-size: none;
+}
+
+label {
+  display: block;
+  margin-block: 0.5rem;
+}

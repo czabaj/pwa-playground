@@ -2,7 +2,7 @@ import type { AppProps } from "next/app";
 import Head from "next/head";
 import { Wrapper as GoogleMapsProvider } from "@googlemaps/react-wrapper";
 
-import "../styles/globals.css";
+import "./_app.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
