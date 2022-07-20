@@ -20,8 +20,8 @@ const Home: NextPage = () => {
           GPS coordinates.
         </li>
         <li>
-          <Link href="/barcode-scan">Barcode scan</Link> - ability to parse
-          barcodes from image (gallery) or directly from the camera.
+          <Link href="/image-capture">Capturing images</Link> - ability to load
+          image from file (gallery) or use device&apos;s camera directly.
         </li>
       </ul>
     </>

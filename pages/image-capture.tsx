@@ -129,7 +129,7 @@ const CameraStream = (props: {
   );
 };
 
-const BarcodeScan = () => {
+const ImageCapture = () => {
   return (
     <ImagePreview width={320}>
       {(imagePreview) => {
@@ -142,11 +142,8 @@ const BarcodeScan = () => {
         };
         return (
           <>
-            <h2>Barcode scan</h2>
-            <p>
-              To scan a barcode we first need an image data. There are three
-              possible ways to get image data:
-            </p>
+            <h2>Capturing images</h2>
+            <p>There are three possible ways to get image data:</p>
             <ul>
               <li>
                 <a href="#upload">
@@ -226,7 +223,7 @@ const BarcodeScan = () => {
             <h4>Examples</h4>
             <label htmlFor="camera-app-user">
               This file upload input shall source an image from your{" "}
-              <em>front-facing</em> camera. Works only on{" "}
+              <em>user-facing</em> camera. Works only on{" "}
               <a href="#camera-app-browsers-support">supported devices</a>,
               otherwise acts as ordinary upload file input.
             </label>
@@ -263,8 +260,8 @@ const BarcodeScan = () => {
             <h4>Example</h4>
             <p>
               To test the example, first click on the button bellow, which will
-              ask you for giving the site the permission for using your
-              device&apos;s camera. The stream from the camera will be then
+              ask you for giving the site permission for using your
+              device&apos;s camera. The stream from the camera will then be
               displayed bellow the button and subsequent clicks on the button
               will shoot the instant images from the stream.
             </p>
@@ -278,4 +275,4 @@ const BarcodeScan = () => {
     </ImagePreview>
   );
 };
-export default BarcodeScan;
+export default ImageCapture;
