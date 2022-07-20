@@ -61,20 +61,34 @@ const ContentPermissionGranted = ({
       <h3>Current position</h3>
       <p>
         The web geolocation API does not specify the source of the location
-        information.{" "}
-        <cite>
-          The Geolocation API defines a high-level interface to location
-          information associated only with the device hosting the
-          implementation, such as latitude and longitude. The API itself is
-          agnostic of the underlying location information sources. Common
-          sources of location information include Global Positioning System
-          (GPS) and location inferred from network signals such as IP address,
-          RFID, WiFi and Bluetooth MAC addresses, and GSM/CDMA cell IDs, as well
-          as user input. No guarantee is given that the API returns the
-          device&apos;s actual location. --
-          https://www.w3.org/2008/geolocation/PER-geolocation-API/#introduction
-        </cite>
-        On a device without GPS sensor the accuracy is unreliable.
+        information.
+      </p>
+      <figure>
+        <blockquote>
+          <p>
+            The Geolocation API defines a high-level interface to location
+            information associated only with the device hosting the
+            implementation, such as latitude and longitude. The API itself is
+            agnostic of the underlying location information sources. Common
+            sources of location information include Global Positioning System
+            (GPS) and location inferred from network signals such as IP address,
+            RFID, WiFi and Bluetooth MAC addresses, and GSM/CDMA cell IDs, as
+            well as user input. No guarantee is given that the API returns the
+            device&apos;s actual location.
+          </p>
+        </blockquote>
+        <figcaption>
+          First sentence in{" "}
+          <cite>
+            <a href="https://www.w3.org/2008/geolocation/PER-geolocation-API/#introduction">
+              Geolocation API Specification, chapter 2 - Introduction
+            </a>
+          </cite>
+        </figcaption>
+      </figure>
+      <p>
+        On a device without GPS sensor the accuracy is unreliable and the
+        application has no clue if it runs on device with GPS or not.
       </p>
       <figure>
         <figcaption>
@@ -118,7 +132,12 @@ const ContentPermissionGranted = ({
             <th scope="col">Timestamp</th>
             <th scope="col">Latitude</th>
             <th scope="col">Longitude</th>
-            <th scope="col">Accuracy</th>
+            <th scope="col">
+              Accuracy
+              <sup>
+                <a href="#footnote-accuracy">[1]</a>
+              </sup>
+            </th>
             <th scope="col">Altitude</th>
             <th scope="col">Altitude Accuracy</th>
             <th scope="col">Heading</th>
@@ -153,6 +172,16 @@ const ContentPermissionGranted = ({
           })}
         </tbody>
       </table>
+
+      <hr />
+      <ol>
+        <li id="footnote-accuracy">
+          distance in meters with 95% confidence, see{" "}
+          <a href="https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates/accuracy">
+            MDN documentation
+          </a>
+        </li>
+      </ol>
     </>
   );
 };
