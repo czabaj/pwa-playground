@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
+import { FormattedTime } from "react-intl";
 
 import {
   Map,
@@ -128,7 +129,18 @@ const ContentPermissionGranted = ({
           {latestPositions.map((pos, i) => {
             return (
               <tr key={i}>
-                <td>{pos.timestamp}</td>
+                <td>
+                  <FormattedTime
+                    day="numeric"
+                    fractionalSecondDigits={3}
+                    hour12={false}
+                    hour="2-digit"
+                    minute="2-digit"
+                    month="short"
+                    second="2-digit"
+                    value={pos.timestamp}
+                  />
+                </td>
                 <td>{pos.coords.latitude}</td>
                 <td>{pos.coords.longitude}</td>
                 <td>{pos.coords.accuracy}</td>

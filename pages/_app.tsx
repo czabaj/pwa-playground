@@ -1,6 +1,7 @@
+import { Wrapper as GoogleMapsProvider } from "@googlemaps/react-wrapper";
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import { Wrapper as GoogleMapsProvider } from "@googlemaps/react-wrapper";
+import { IntlProvider } from "react-intl";
 
 import "./_app.css";
 
@@ -85,7 +86,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <h1>PWA Playground</h1>
       <GoogleMapsProvider apiKey="AIzaSyDGZ429UkFfrdDSwwT0fRttHKYcELaOqQc">
-        <Component {...pageProps} />
+        <IntlProvider locale="en">
+          <Component {...pageProps} />
+        </IntlProvider>
       </GoogleMapsProvider>
     </>
   );
