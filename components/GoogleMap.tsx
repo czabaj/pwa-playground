@@ -12,7 +12,7 @@ import {
 } from "react";
 
 export const geoPositionToLatLng = (
-  position: GeolocationPosition
+  position: Pick<GeolocationPosition, `coords`>
 ): google.maps.LatLngLiteral => ({
   lat: position.coords.latitude,
   lng: position.coords.longitude,
@@ -30,14 +30,16 @@ export const latLngsToBounds = (
 
 interface MapProps extends google.maps.MapOptions {
   bounds?: google.maps.LatLngBounds;
+  className?: string;
   children?: ReactNode;
   onClick?: (e: google.maps.MapMouseEvent) => void;
   onIdle?: (map: google.maps.Map) => void;
-  style: CSSProperties;
+  style?: CSSProperties;
 }
 
 export const Map = ({
   bounds,
+  className,
   onClick,
   onIdle,
   children,
@@ -72,6 +74,7 @@ export const Map = ({
   }, [map, bounds]);
   return (
     <div
+      className={className}
       ref={(node) => {
         if (!map && node) {
           setMap(new window.google.maps.Map(node, options));

@@ -6,8 +6,6 @@ body {
 body {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-  padding-block: 1.5rem;
-  padding-inline: 2rem;
 }
 
 * {

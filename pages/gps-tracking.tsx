@@ -9,6 +9,7 @@ import {
   geoPositionToLatLng,
   latLngsToBounds,
 } from "../components/GoogleMap";
+import { LayoutDocs } from "../components/LayoutDocs";
 import classes from "./gps-tracking.module.scss";
 
 const useCurrentPosition = () => {
@@ -57,7 +58,7 @@ const ContentPermissionGranted = ({
   const latestPositions = useLatestPositions();
   const latestPositionsLatLngs = latestPositions.map(geoPositionToLatLng);
   return (
-    <>
+    <LayoutDocs>
       <h3>Current position</h3>
       <p>
         The web geolocation API does not specify the source of the location
@@ -182,7 +183,7 @@ const ContentPermissionGranted = ({
           </a>
         </li>
       </ol>
-    </>
+    </LayoutDocs>
   );
 };
 

@@ -1,9 +1,11 @@
 import type { NextPage } from "next";
 import Link from "next/link";
 
+import { LayoutDocs } from "../components/LayoutDocs";
+
 const Home: NextPage = () => {
   return (
-    <>
+    <LayoutDocs>
       <p>
         This repository holds demonstration of progressive web app (PWA)
         features. It shall reveal its limits opposed to native mobile
@@ -23,8 +25,11 @@ const Home: NextPage = () => {
           <Link href="/image-capture">Capturing images</Link> - ability to load
           image from file (gallery) or use device&apos;s camera directly.
         </li>
+        <li>
+          <Link href="/demo">Demo</Link>
+        </li>
       </ul>
-    </>
+    </LayoutDocs>
   );
 };
 

@@ -1,5 +1,7 @@
 import { ChangeEvent, ReactElement, useRef, useState } from "react";
 
+import { LayoutDocs } from "../components/LayoutDocs";
+
 const fileToImage = (file: File): Promise<HTMLImageElement> =>
   new Promise<HTMLImageElement>((resolve, reject) => {
     const reader = new FileReader();
@@ -141,7 +143,7 @@ const ImageCapture = () => {
           }
         };
         return (
-          <>
+          <LayoutDocs>
             <h2>Capturing images</h2>
             <p>There are three possible ways to get image data:</p>
             <ul>
@@ -269,7 +271,7 @@ const ImageCapture = () => {
             <h3>Image preview</h3>
             The image source for the next chapter
             <div>{imagePreview.preview}</div>
-          </>
+          </LayoutDocs>
         );
       }}
     </ImagePreview>

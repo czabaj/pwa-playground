@@ -84,7 +84,6 @@ function MyApp({ Component, pageProps }: AppProps) {
           content="https://yourdomain.com/icons/apple-touch-icon.png"
         />
       </Head>
-      <h1>PWA Playground</h1>
       <GoogleMapsProvider apiKey="AIzaSyDGZ429UkFfrdDSwwT0fRttHKYcELaOqQc">
         <IntlProvider locale="en">
           <Component {...pageProps} />
