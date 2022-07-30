@@ -1,13 +1,14 @@
-export type Item = {
+export type Sample = {
   name: string;
+  id: string;
 };
 
 export type Point = {
   address: string;
   location: Pick<GeolocationCoordinates, `latitude` | `longitude`>;
   name: string;
-  itemsTake?: Item[];
-  itemsGive?: Item[];
+  itemsTake: Sample[];
+  itemsGive?: Sample[];
 };
 
 export type Manifest = {

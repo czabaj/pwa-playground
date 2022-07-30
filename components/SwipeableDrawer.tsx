@@ -41,12 +41,15 @@ export const SwipeableDrawer = (props: SwipeableDrawerProps) => {
   return (
     <MUISwipeableDrawer
       anchor="bottom"
-      open={props.open}
+      disableSwipeToOpen={false}
+      elevation={1}
+      hideBackdrop={true}
       onClose={props.onOpen}
       onOpen={props.onClose}
-      swipeAreaWidth={drawerBleeding}
-      disableSwipeToOpen={false}
+      open={props.open}
       style={props.style}
+      swipeAreaWidth={drawerBleeding}
+      variant={props.open ? `permanent` : `temporary`}
       ModalProps={{
         keepMounted: true,
       }}
@@ -59,7 +62,6 @@ export const SwipeableDrawer = (props: SwipeableDrawerProps) => {
           }),
         },
       }}
-      hideBackdrop={true}
     >
       <StyledBox
         sx={{
