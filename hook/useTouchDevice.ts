@@ -1,8 +1,9 @@
 import React from "react";
 
-const touchDeviceMediaQuery = window.matchMedia(
-  `(hover: none) and (pointer: coarse)`
-);
+const touchDeviceMediaQuery: MediaQueryList =
+  typeof window === `undefined`
+    ? ({ matches: false } as any)
+    : window.matchMedia(`(hover: none) and (pointer: coarse)`);
 
 export const useToucheDevice = () => {
   const [touchDevice, setTouchDevice] = React.useState(
