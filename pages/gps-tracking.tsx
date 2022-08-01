@@ -58,7 +58,7 @@ const ContentPermissionGranted = ({
   const latestPositions = useLatestPositions();
   const latestPositionsLatLngs = latestPositions.map(geoPositionToLatLng);
   return (
-    <LayoutDocs>
+    <>
       <h3>Current position</h3>
       <p>
         The web geolocation API does not specify the source of the location
@@ -183,7 +183,7 @@ const ContentPermissionGranted = ({
           </a>
         </li>
       </ol>
-    </LayoutDocs>
+    </>
   );
 };
 
@@ -191,7 +191,7 @@ const GPSTracking: NextPage = () => {
   const currentPosition = useCurrentPosition();
 
   return (
-    <>
+    <LayoutDocs>
       <h2>GPS Tracking</h2>
       <p>
         The GPS location is accessible through the{" "}
@@ -236,7 +236,7 @@ const GPSTracking: NextPage = () => {
       ) : (
         <ContentPermissionGranted position={currentPosition} />
       )}
-    </>
+    </LayoutDocs>
   );
 };
 
