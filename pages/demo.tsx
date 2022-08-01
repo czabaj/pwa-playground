@@ -6,9 +6,11 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
-import Collapse from "@mui/material/Collapse";;
+import Collapse from "@mui/material/Collapse";
+
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import StarBorder from "@mui/icons-material/StarBorder";
 import Drawer, { type DrawerProps } from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar";
@@ -19,6 +21,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import ListIcon from "@mui/icons-material/List";
 import MenuIcon from "@mui/icons-material/Menu";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PlaceIcon from "@mui/icons-material/Place";
 import concat from "lodash/fp/concat";
 import pull from "lodash/fp/pull";
@@ -32,6 +35,10 @@ import {
 } from "../components/GoogleMap";
 import { SwipeableDrawer } from "../components/SwipeableDrawer";
 import { useHashParam } from "../hook/useHashParam";
+import {
+  notificationsDeniedAlert,
+  useNotifications,
+} from "../hook/useNotifications";
 import classes from "./demo.module.scss";
 import { Manifest, Sample } from "./demo.types";
 
@@ -87,6 +94,8 @@ const manifest: Manifest = {
   ],
 };
 
+const photos = new Map<string, Img>();
+
 const manifestLatLng = manifest.points.map(({ location }) =>
   geoPositionToLatLng({ coords: location as any })
 );
@@ -99,6 +108,17 @@ const addLat = (latLng: google.maps.LatLngLiteral, n: number) => ({
 type NavDrawerProps = Pick<DrawerProps, `onClose` | `open`>;
 
 const NavDrawer = (props: NavDrawerProps) => {
+  const notifications = useNotifications();
+  const onNotificationClick =
+    notifications.permission === `default`
+      ? () =>
+          notifications.requestPermission!().then(
+            () => notifications.sendPermanentNotification!(),
+            notificationsDeniedAlert
+          )
+      : notifications.permission === `denied`
+      ? notificationsDeniedAlert
+      : () => notifications.sendPermanentNotification();
   return (
     <Drawer anchor="left" open={props.open} onClose={props.onClose}>
       <Toolbar>
@@ -145,6 +165,36 @@ const NavDrawer = (props: NavDrawerProps) => {
             </ListItemButton>
           </ListItem>
         ))}
+        <Divider />
+        <ListItem disablePadding>
+          <ListItemButton onClick={onNotificationClick}>
+            <ListItemIcon>
+              <NotificationsActiveIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Send Notification"
+              secondary={
+                notifications.permission === `default`
+                  ? `You will be prompted for notification permissions`
+                  : notifications.permission === `denied`
+                  ? `The notifications are denied ☹️`
+                  : `A notification will be dispatched`
+              }
+            />
+          </ListItemButton>
+        </ListItem>
+        <Divider />
+        <ListItem disablePadding>
+          <ListItemButton href="/">
+            <ListItemIcon>
+              <MenuBookIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="PWA Documentation"
+              secondary="Leaves this demo app"
+            />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Drawer>
   );
@@ -152,7 +202,6 @@ const NavDrawer = (props: NavDrawerProps) => {
 
 const SamplesList = (props: { items: Sample[] }) => {
   const [expanded, setExpanded] = React.useState<string[]>([]);
-
   return (
     <List
       sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
