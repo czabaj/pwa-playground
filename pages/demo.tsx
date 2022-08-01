@@ -11,14 +11,15 @@ import Collapse from "@mui/material/Collapse";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
-import StarBorder from "@mui/icons-material/StarBorder";
 import Drawer, { type DrawerProps } from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
+import IconButton from "@mui/material/IconButton";
 import ListIcon from "@mui/icons-material/List";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -230,9 +231,9 @@ const SamplesList = (props: { items: Sample[] }) => {
               <List component="div" disablePadding>
                 <ListItemButton sx={{ pl: 4 }}>
                   <ListItemIcon>
-                    <StarBorder />
+                    <CheckBoxOutlineBlankIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Starred" />
+                  <ListItemText primary="Proof of delivery" />
                 </ListItemButton>
               </List>
             </Collapse>
