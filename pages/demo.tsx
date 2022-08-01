@@ -94,8 +94,6 @@ const manifest: Manifest = {
   ],
 };
 
-const photos = new Map<string, Img>();
-
 const manifestLatLng = manifest.points.map(({ location }) =>
   geoPositionToLatLng({ coords: location as any })
 );

@@ -18,15 +18,23 @@ const Home: NextPage = () => {
       </p>
       <ul>
         <li>
-          <Link href="/gps-tracking">Geolocation</Link> - ability to obtain user
-          GPS coordinates.
+          <Link href="/gps-tracking">Geolocation</Link> - ability to obtain
+          user&apos;s GPS coordinates.
         </li>
         <li>
           <Link href="/image-capture">Capturing images</Link> - ability to load
           image from file (gallery) or use device&apos;s camera directly.
         </li>
         <li>
-          <Link href="/demo">Demo</Link>
+          <Link href="/notifications">Notifications</Link> - ability to notify
+          the user even when the page is in the background.
+        </li>
+        <li>
+          <Link href="/barcode-scan">Barcode scan</Link> - ability to detect
+          barcode on an image and parse it.l
+        </li>
+        <li>
+          <Link href="/demo">Demo</Link> - an interactive demo application
         </li>
       </ul>
     </LayoutDocs>

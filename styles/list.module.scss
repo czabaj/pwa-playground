@@ -1,0 +1,17 @@
+%resetList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+:where(ol, ul).inline {
+  @extend %resetList;
+
+  & > li {
+    display: inline;
+  }
+
+  & > li + li::before {
+    content: ", ";
+  }
+}

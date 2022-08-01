@@ -1,19 +1,11 @@
 {
-  "name": "pwa-playground",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev -p 4000",
-    "build": "next build",
-    "start": "next start -p 4000",
-    "lint": "next lint"
-  },
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.9.2",
+    "barcode-detector": "^1.0.0",
     "lodash": "^4.17.21",
     "next": "12.1.6",
     "next-pwa": "^5.5.4",
@@ -32,5 +24,17 @@
     "prettier": "^2.7.1",
     "sass": "^1.53.0",
     "typescript": "4.7.3"
-  }
+  },
+  "name": "pwa-playground",
+  "private": true,
+  "resolutions": {
+    "barcode-detector": "https://github.com/czabaj/barcode-detector.git#hack/allow_use_zxing"
+  },
+  "scripts": {
+    "dev": "next dev -p 4000",
+    "build": "next build",
+    "start": "next start -p 4000",
+    "lint": "next lint"
+  },
+  "version": "0.1.0"
 }
