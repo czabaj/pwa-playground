@@ -11,7 +11,11 @@
     display: inline;
   }
 
-  & > li + li::before {
+  & > li::after {
     content: ", ";
+  }
+
+  & > li:last-child::after {
+    content: ".";
   }
 }
