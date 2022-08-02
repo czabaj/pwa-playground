@@ -1,5 +1,12 @@
-.preformatted {
-  max-inline-size: 80ch;
-  background-color: aliceblue;
-  white-space: pre-wrap;
+.barcodeCapture {
+  display: flex;
+  flex-wrap: wrap;
+  max-inline-size: 60ch;
+
+  & > pre {
+    flex-grow: 1;
+    margin: 0;
+    flex-basis: 20ch;
+    min-block-size: 20ch;
+  }
 }

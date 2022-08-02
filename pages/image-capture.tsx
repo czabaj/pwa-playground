@@ -1,26 +1,9 @@
-import { ChangeEvent, ReactElement, useRef, useState } from "react";
+import { ChangeEvent, ReactElement, useRef } from "react";
 
 import { LayoutDocs } from "../components/LayoutDocs";
-import { fileToImage } from '../utils/file';
+import { fileToImage, getResizedImage, useVideoStream } from "../utils/file";
 
 const IMAGE_WIDTH = 320;
-
-const getResizedImage = (
-  source: HTMLImageElement | HTMLVideoElement,
-  width: number
-): string => {
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d")!;
-  const height =
-    source instanceof HTMLVideoElement
-      ? source.videoHeight / (source.videoWidth / width)
-      : source.naturalHeight / (source.naturalWidth / width);
-  if (!width || !height) return ``;
-  canvas.width = width;
-  canvas.height = height;
-  context.drawImage(source, 0, 0, width, height);
-  return canvas.toDataURL("image/png");
-};
 
 type ImagePreviewProps = {
   width: number;
@@ -73,39 +56,9 @@ const CameraStream = (props: {
   takePicture: (video: HTMLVideoElement) => void;
   width: number;
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoState, setVideoState] = useState<
-    `STAND_BY` | `INITIALIZATION` | `OK` | `KO`
-  >(`STAND_BY`);
-  const startVideo = () => {
-    setVideoState(`INITIALIZATION`);
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
-      .then(
-        (stream) => {
-          videoRef.current!.srcObject = stream;
-          return videoRef.current!.play();
-        },
-        (err) => {
-          console.error(`Call to 'getUserMedia' resulted in an error`, err);
-        }
-      )
-      .then(
-        () => {
-          const video = videoRef.current!;
-          const height = String(
-            video.videoHeight / (video.videoWidth / props.width)
-          );
-          const width = String(props.width);
-          video.setAttribute("width", width);
-          video.setAttribute("height", height);
-          setVideoState(`OK`);
-        },
-        (err) => {
-          console.error(`Call to 'video.play' resulted in an error`, err);
-        }
-      );
-  };
+  const { startVideo, videoEl, videoRef, videoState } = useVideoStream(
+    props.width
+  );
 
   const buttonAction =
     videoState === `STAND_BY` || videoState === `KO`
@@ -125,7 +78,7 @@ const CameraStream = (props: {
             : `Initialize the video stream`}
         </button>
       </div>
-      <video ref={videoRef}>Video stream not available.</video>
+      {videoEl}
     </>
   );
 };

@@ -4,27 +4,13 @@ import React, { useEffect } from "react";
 
 import { LayoutDocs } from "../components/LayoutDocs";
 import listClasses from "../styles/list.module.scss";
-import { fileToImage } from "../utils/file";
+import { fileToImage, useVideoStream } from "../utils/file";
 import classes from "./barcode-scan.module.scss";
-
-type DetectedBarcode = {
-  boundingBox: DOMRectReadOnly;
-  cornerPoints: { x: number; y: number };
-  format: string;
-  rawValue: string;
-};
-
-// The API does not exist in the TypeScript dom.d.ts types yet
-type BarcodeDetectorStatic = {
-  new (options?: { formats?: string[] }): {
-    detect: (
-      imageBitmapSource: Blob | HTMLImageElement | ImageData
-    ) => Promise<DetectedBarcode[]>;
-  };
-  getSupportedFormats: () => Promise<string[]>;
-};
-
-type BarcodeDetectorAPI = { BarcodeDetector: BarcodeDetectorStatic };
+import {
+  BarcodeDetectorAPI,
+  DetectedBarcode,
+  ImageBitmapSource,
+} from "./barcode-scan.d";
 
 const nativeBarcodeDetectorAvailable =
   typeof window !== `undefined` && `BarcodeDetector` in window;
@@ -40,6 +26,162 @@ const getBarcodeDetectorAPI = once(
             } as any)
         )
 );
+
+const useBarcodeDetect = (barcodeDetectorAPI: BarcodeDetectorAPI) => {
+  const [barcodeDetectResult, setBarcodeDetectResult] = React.useState<
+    { error: string } | { detectedBarcodes: DetectedBarcode[] } | undefined
+  >();
+  const barcodeDetect = (
+    imageBitmapSource: ImageBitmapSource | Promise<ImageBitmapSource>
+  ) =>
+    Promise.resolve(imageBitmapSource).then((source) =>
+      new barcodeDetectorAPI.BarcodeDetector().detect(source).then(
+        (detectedBarcodes) =>
+          setBarcodeDetectResult({
+            detectedBarcodes: uniqBy(
+              detectedBarcodes,
+              ({ format, rawValue }) => `${format}${rawValue}`
+            ),
+          }),
+        (error) =>
+          setBarcodeDetectResult({ detectedBarcodes: undefined, error })
+      )
+    );
+  return { barcodeDetect, barcodeDetectResult };
+};
+
+const BarcodeExampleUploadFromFile = ({
+  barcodeDetectorAPI,
+}: {
+  barcodeDetectorAPI: BarcodeDetectorAPI;
+}) => {
+  const { barcodeDetect, barcodeDetectResult } =
+    useBarcodeDetect(barcodeDetectorAPI);
+  return (
+    <>
+      <h4>Detect from uploaded picture</h4>
+      <p>
+        Load a picture with supported barcode, the image can contain more than
+        one supported barcode, all will be decoded. We have found from the
+        experiments that the polyfilled implementation does not handle multiple
+        barcodes as good as native implementation.
+      </p>
+      <label htmlFor="barcode-upload">Upload image for barcode detection</label>
+      <input
+        accept="image/*"
+        capture="environment"
+        id="barcode-upload"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) {
+            barcodeDetect(fileToImage(file));
+          }
+        }}
+        type="file"
+      />
+      {barcodeDetectResult &&
+        (`error` in barcodeDetectResult ? (
+          <>
+            <p>The decoding failed with an error</p>
+            <pre>{JSON.stringify(barcodeDetectResult.error, null, 2)}</pre>
+          </>
+        ) : (
+          <>
+            <div>
+              The decoding succeeded. Number of barcodes found:{" "}
+              {barcodeDetectResult.detectedBarcodes.length}
+            </div>
+            <pre>
+              {JSON.stringify(
+                barcodeDetectResult.detectedBarcodes.map(
+                  ({ format, rawValue }) => ({
+                    format,
+                    rawValue,
+                  })
+                ),
+                null,
+                2
+              )}
+            </pre>
+          </>
+        ))}
+    </>
+  );
+};
+
+const BarcodeExampleLiveStream = ({
+  barcodeDetectorAPI,
+}: {
+  barcodeDetectorAPI: BarcodeDetectorAPI;
+}) => {
+  const { barcodeDetect, barcodeDetectResult } =
+    useBarcodeDetect(barcodeDetectorAPI);
+  const { startVideo, videoEl, videoRef, videoState } = useVideoStream(320);
+  React.useEffect(() => {
+    if (videoState === `OK` && videoRef.current) {
+      const intervalId = window.setInterval(() => {
+        barcodeDetect(videoRef.current!);
+      }, 200);
+      return () => window.clearInterval(intervalId);
+    }
+  }, [videoState]);
+
+  const buttonAction =
+    videoState === `STAND_BY` || videoState === `KO` ? startVideo : undefined;
+
+  return (
+    <>
+      <h4>Detect from live stream</h4>
+      <p>
+        Here we are going to build a barcode scanner from camera stream. The
+        Barcode Detection API has no built in method for this, but we can use
+        the{" "}
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices">
+          MediaDevices interface
+        </a>{" "}
+        to build our own solution.
+      </p>
+      <p>
+        The native methods usually displays a bounding box around the barcode
+        detected in the image stream, which is doable - the API provides to us
+        position of the detected barcode - but this is too laborious for our
+        example.
+      </p>
+      <p>
+        Start by click on the button bellow. You might be prompted for giving
+        this site a permission for accessing a camera.
+      </p>
+      <button disabled={!buttonAction} onClick={buttonAction} type="button">
+        {videoState === `OK` ? (
+          <>Video stream started</>
+        ) : (
+          <>Start camera stream</>
+        )}
+      </button>
+      <div className={classes.barcodeCapture}>
+        {videoEl}
+        {videoState === `OK` && (
+          <pre>
+            {barcodeDetectResult &&
+              `detectedBarcodes` in barcodeDetectResult &&
+              barcodeDetectResult.detectedBarcodes?.length > 0 &&
+              JSON.stringify(
+                barcodeDetectResult.detectedBarcodes.map(
+                  ({ format, rawValue }) => ({
+                    format,
+                    rawValue,
+                  })
+                ),
+                null,
+                2
+              )}
+          </pre>
+        )}
+      </div>
+    </>
+  );
+};
+
 const BarcodeDetectorExample = ({
   barcodeDetectorAPI,
 }: {
@@ -78,66 +220,8 @@ const BarcodeDetectorExample = ({
           <li key={format}>{format}</li>
         ))}
       </ol>
-      <p>
-        Load a picture with supported barcode, the image can contain more than
-        one supported barcode, all will be decoded. We have found from the
-        experiments that the polyfilled implementation does not handle multiple
-        barcodes as good as native implementation.
-      </p>
-      <label htmlFor="barcode-upload">Upload image for barcode detection</label>
-      <input
-        accept="image/*"
-        capture="environment"
-        id="barcode-upload"
-        onChange={(event) => {
-          const file = event.target.files?.[0];
-          if (file) {
-            fileToImage(file)
-              .then((img) =>
-                new barcodeDetectorAPI.BarcodeDetector().detect(img)
-              )
-              .then(
-                (detectedBarcodes) =>
-                  setBarcodeDecodeResult({
-                    detectedBarcodes: uniqBy(
-                      detectedBarcodes,
-                      ({ format, rawValue }) => `${format}${rawValue}`
-                    ),
-                  }),
-                (error) => setBarcodeDecodeResult({ error })
-              );
-          }
-        }}
-        type="file"
-      />
-      {barcodeDecodeResult &&
-        (`error` in barcodeDecodeResult ? (
-          <>
-            <p>The decoding failed with an error</p>
-            <pre className={classes.preformatted}>
-              {JSON.stringify(barcodeDecodeResult.error, null, 2)}
-            </pre>
-          </>
-        ) : (
-          <>
-            <div>
-              The decoding succeeded. Number of barcodes found:{" "}
-              {barcodeDecodeResult.detectedBarcodes.length}
-            </div>
-            <pre className={classes.preformatted}>
-              {JSON.stringify(
-                barcodeDecodeResult.detectedBarcodes.map(
-                  ({ format, rawValue }) => ({
-                    format,
-                    rawValue,
-                  })
-                ),
-                null,
-                2
-              )}
-            </pre>
-          </>
-        ))}
+      <BarcodeExampleUploadFromFile barcodeDetectorAPI={barcodeDetectorAPI} />
+      <BarcodeExampleLiveStream barcodeDetectorAPI={barcodeDetectorAPI} />
     </>
   );
 };
@@ -187,6 +271,10 @@ export const BarcodeScan = () => {
           that utilizes the open-source libraries.
         </li>
       </ul>
+      <p>
+        In the following examples, we are going to test the native
+        implementation with the polyfill.
+      </p>
       <h3>Example</h3>
       {!barcodeDetectorAPI ? (
         <div>Loading the API</div>
