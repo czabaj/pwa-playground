@@ -112,12 +112,12 @@ const NavDrawer = (props: NavDrawerProps) => {
     notifications.permission === `default`
       ? () =>
           notifications.requestPermission!().then(
-            () => notifications.sendPermanentNotification!(),
+            notifications.sendPersistentNotification,
             notificationsDeniedAlert
           )
       : notifications.permission === `denied`
       ? notificationsDeniedAlert
-      : () => notifications.sendPermanentNotification();
+      : notifications.sendPersistentNotification;
   return (
     <Drawer anchor="left" open={props.open} onClose={props.onClose}>
       <Toolbar>
@@ -166,14 +166,19 @@ const NavDrawer = (props: NavDrawerProps) => {
         ))}
         <Divider />
         <ListItem disablePadding>
-          <ListItemButton onClick={onNotificationClick}>
+          <ListItemButton
+            disabled={notifications.permission === `unsupported`}
+            onClick={onNotificationClick}
+          >
             <ListItemIcon>
               <NotificationsActiveIcon />
             </ListItemIcon>
             <ListItemText
               primary="Send Notification"
               secondary={
-                notifications.permission === `default`
+                notifications.permission === `unsupported`
+                  ? `The Notification API is not supported in this browser`
+                  : notifications.permission === `default`
                   ? `You will be prompted for notification permissions`
                   : notifications.permission === `denied`
                   ? `The notifications are denied ☹️`
