@@ -66,7 +66,10 @@ const BarcodeExampleUploadFromFile = ({
         experiments that the polyfilled implementation does not handle multiple
         barcodes as good as native implementation.
       </p>
-      <label htmlFor="barcode-upload">Upload image for barcode detection</label>
+      <label htmlFor="barcode-upload">
+        Upload image for barcode detection (uses a rear-facing camera on the
+        phone)
+      </label>
       <input
         accept="image/*"
         capture="environment"

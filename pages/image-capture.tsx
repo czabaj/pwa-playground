@@ -108,7 +108,10 @@ const ImageCapture = () => {
         on any platform. We can restrict the upload input to just images with{" "}
         <code>accept=&quot;image/*&quot;</code> attribute or to specific file
         types, e.g. <code>accept=&quot;.png*&quot;</code> to allow upload just
-        PNG image types.
+        PNG image types. Browsers on mobile phone handles such restricted file
+        upload input in a nice way, when it detects that the input is restricted
+        to images, it offers to the user pick image from system gallery or take
+        an instant image with camera.
       </p>
       <h4>Example</h4>
       <ImagePreview width={IMAGE_WIDTH}>
@@ -149,20 +152,12 @@ const ImageCapture = () => {
       </p>
       <h4 id="camera-app-browsers-support">Browsers devices</h4>
       <p>
-        Unfortunately, the{" "}
-        <a href="https://caniuse.com/mdn-html_elements_input_attributes_capture">
-          <code>capture</code> attribute is not widely supported
+        The{" "}
+        <a href="https://caniuse.com/mdn-html_elements_input_capture">
+          <code>capture</code> attribute is well supported
         </a>
-        . Generally, it shall work on Android mobile devices and not on Apple.
-        Also, it does not work on desktop devices even if a web-camera is
-        attached.
-      </p>
-      <p>
-        According to some old sources, the <code>capture</code> attribute could
-        have been used to specify, that the device shall open the user&apos;s
-        image gallery with a <code>capture=&quot;filesystem&quot;</code> value,
-        but such value is not listed in the specification and is therefor not
-        guarantied to work.
+        . Generally, it shall work on mobile devices. It does not work on
+        desktop devices even if a web-camera is attached.
       </p>
       <h4>Examples</h4>
       <ImagePreview width={IMAGE_WIDTH}>
@@ -188,7 +183,13 @@ const ImageCapture = () => {
                 <a href="#camera-app-browsers-support">supported devices</a>,
                 otherwise acts as ordinary upload file input.
               </label>
-
+              <input
+                accept="image/*"
+                capture="environment"
+                id="camera-app-user"
+                onChange={imagePreview.fileInputChangeHandler}
+                type="file"
+              />
               <div>{imagePreview.preview}</div>
             </>
           );
