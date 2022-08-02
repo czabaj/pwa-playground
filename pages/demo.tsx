@@ -285,7 +285,7 @@ const Demo = () => {
               // SwipeableDrawer - poor hack, do not use
               center: addLat(
                 manifestLatLng[hashParam as any],
-                swipeableDrawerOpen ? -0.002 : 0
+                swipeableDrawerOpen ? -0.0015 : 0
               ),
             }
           : { bounds: latLngsToBounds(manifestLatLng) })}

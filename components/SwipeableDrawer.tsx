@@ -44,12 +44,11 @@ export const SwipeableDrawer = (props: SwipeableDrawerProps) => {
       disableSwipeToOpen={false}
       elevation={1}
       hideBackdrop={true}
-      onClose={props.onOpen}
-      onOpen={props.onClose}
+      onClose={props.onClose}
+      onOpen={props.onOpen}
       open={props.open}
       style={props.style}
       swipeAreaWidth={drawerBleeding}
-      variant={props.open ? `permanent` : `temporary`}
       ModalProps={{
         keepMounted: true,
       }}
