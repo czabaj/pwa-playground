@@ -42,3 +42,7 @@ blockquote {
   margin-inline-start: 0;
   padding-inline-start: 1rem;
 }
+
+button {
+  margin-block: 1rem;
+}
