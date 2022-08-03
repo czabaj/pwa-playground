@@ -57,7 +57,8 @@ const CameraStream = (props: {
   width: number;
 }) => {
   const { startVideo, videoEl, videoRef, videoState } = useVideoStream(
-    props.width
+    props.width,
+    `user`
   );
 
   const buttonAction =

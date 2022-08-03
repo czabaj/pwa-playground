@@ -33,41 +33,72 @@ export const getResizedImage = (
   return canvas.toDataURL("image/png");
 };
 
-export const useVideoStream = (width: number) => {
+type FacingMode = `user` | `environment`;
+
+const getVideoStream = (facingMode: FacingMode) =>
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: facingMode },
+    audio: false,
+  });
+
+const getDummyStream = (fillColor = `#fff`) => {
+  const canvas = document.createElement(`canvas`);
+  canvas.width = 1;
+  canvas.height = 1;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = fillColor;
+  ctx.fillRect(0, 0, 1, 1);
+  return canvas.captureStream();
+};
+
+export const useVideoStream = (width: number, facingMode: FacingMode) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoState, setVideoState] = useState<
     `STAND_BY` | `INITIALIZATION` | `OK` | `KO`
   >(`STAND_BY`);
-  const startVideo = () => {
+  const videoStreamRef = useRef<MediaStream | undefined>();
+  const startVideo = async () => {
     setVideoState(`INITIALIZATION`);
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
-      .then(
-        (stream) => {
-          videoRef.current!.srcObject = stream;
-          return videoRef.current!.play();
-        },
-        (err) => {
-          console.error(`Call to 'getUserMedia' resulted in an error`, err);
-        }
-      )
-      .then(
-        () => {
-          const video = videoRef.current!;
-          const videoHeight = String(
-            video.videoHeight / (video.videoWidth / width)
-          );
-          const videoWidth = String(width);
-          video.setAttribute("width", videoWidth);
-          video.setAttribute("height", videoHeight);
-          setVideoState(`OK`);
-        },
-        (err) => {
-          console.error(`Call to 'video.play' resulted in an error`, err);
-        }
+    const video = videoRef.current!;
+    let stream = videoStreamRef.current;
+    if (!stream) {
+      video.srcObject = getDummyStream();
+      try {
+        [stream] = await Promise.all([
+          getVideoStream(facingMode),
+          video.play(),
+        ]);
+        videoStreamRef.current = stream;
+      } catch (error) {
+        console.error(`Call to 'getUserMedia' resulted in an error`, error);
+        setVideoState(`KO`);
+        return;
+      }
+    }
+    try {
+      video.srcObject = stream!;
+      video.load();
+      await video.play();
+      const videoHeight = String(
+        video.videoHeight / (video.videoWidth / width)
       );
+      video.setAttribute("height", videoHeight);
+      setVideoState(`OK`);
+    } catch (error) {
+      console.error(`Call to 'video.play' resulted in an error`, error);
+      setVideoState(`KO`);
+    }
   };
-  const videoEl = <video ref={videoRef}>Video stream not available.</video>;
+  const videoEl = (
+    <video
+      height={(width / 16) * 9}
+      playsInline={true}
+      ref={videoRef}
+      width={width}
+    >
+      Video stream not available.
+    </video>
+  );
 
   return { startVideo, videoEl, videoRef, videoState };
 };

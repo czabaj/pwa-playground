@@ -119,7 +119,7 @@ const BarcodeExampleLiveStream = ({
 }) => {
   const { barcodeDetect, barcodeDetectResult } =
     useBarcodeDetect(barcodeDetectorAPI);
-  const { startVideo, videoEl, videoRef, videoState } = useVideoStream(320);
+  const { startVideo, videoEl, videoRef, videoState } = useVideoStream(320, `environment`);
   React.useEffect(() => {
     if (videoState === `OK` && videoRef.current) {
       const intervalId = window.setInterval(() => {
