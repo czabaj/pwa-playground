@@ -1,47 +1,52 @@
 import AppBar from "@mui/material/AppBar";
-import List from "@mui/material/List";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Button from "@mui/material/Button";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
+import Drawer, { type DrawerProps } from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListIcon from "@mui/icons-material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
-import Collapse from "@mui/material/Collapse";
-
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
-import Drawer, { type DrawerProps } from "@mui/material/Drawer";
+import PlaceIcon from "@mui/icons-material/Place";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
-import IconButton from "@mui/material/IconButton";
-import ListIcon from "@mui/icons-material/List";
-import MenuIcon from "@mui/icons-material/Menu";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PlaceIcon from "@mui/icons-material/Place";
-import concat from "lodash/fp/concat";
-import pull from "lodash/fp/pull";
 import React from "react";
 
 import {
-  Map,
+  GoogleMap,
   Marker,
   geoPositionToLatLng,
   latLngsToBounds,
 } from "../components/GoogleMap";
 import { SwipeableDrawer } from "../components/SwipeableDrawer";
+import {
+  useBarcodeDetectorAPI,
+  useBarcodeDetect,
+} from "../hook/useBarcodeDetectorAPI";
 import { useHashParam } from "../hook/useHashParam";
 import {
   notificationsDeniedAlert,
   useNotifications,
 } from "../hook/useNotifications";
+import { useVideoStream, VideoStream } from "../hook/useVideoStream";
+import { BarcodeDetectorAPI } from "../types/BarcodeDetectorAPI";
 import classes from "./demo.module.scss";
 import { Manifest, Sample } from "./demo.types";
+import { sample } from "lodash";
 
 let uid = 1;
 const getUID = () => `${uid++}`;
@@ -204,48 +209,158 @@ const NavDrawer = (props: NavDrawerProps) => {
   );
 };
 
-const SamplesList = (props: { items: Sample[] }) => {
-  const [expanded, setExpanded] = React.useState<string[]>([]);
+const ProofOfPickupDialog = (props: {
+  barcodeDetectorAPI: BarcodeDetectorAPI;
+  onDismiss: () => void;
+  onScan: (barcodeData: string) => void;
+  sample?: Sample;
+  videoStream: VideoStream;
+}) => {
+  const { barcodeDetect, barcodeDetectResult } = useBarcodeDetect(
+    props.barcodeDetectorAPI
+  );
+  const barcodeDetected =
+    barcodeDetectResult &&
+    `detectedBarcodes` in barcodeDetectResult &&
+    barcodeDetectResult.detectedBarcodes?.length > 0;
+  const { videoEl, videoRef, videoState } = props.videoStream;
+  React.useEffect(() => {
+    if (props.sample && videoState === `OK` && videoRef.current) {
+      const intervalId = window.setInterval(() => {
+        barcodeDetect(videoRef.current!);
+      }, 200);
+      return () => window.clearInterval(intervalId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoState]);
+
   return (
-    <List
-      sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-      subheader={
-        <ListSubheader component="div" id="nested-list-subheader">
-          Pickup Samples
-        </ListSubheader>
-      }
+    <Dialog
+      keepMounted={true}
+      onClose={props.onDismiss}
+      open={Boolean(props.sample)}
     >
-      {props.items.map((sample) => {
-        const sampleOpened = expanded.includes(sample.id);
-        return (
-          <React.Fragment key={sample.id}>
-            <ListItemButton
-              onClick={() => {
-                setExpanded(
-                  sampleOpened ? pull(sample.id) : (concat(sample.id) as any)
-                );
-              }}
-            >
-              <ListItemIcon>
-                <HealthAndSafetyIcon />
-              </ListItemIcon>
-              <ListItemText primary={sample.name} />
-              {sampleOpened ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-            <Collapse in={sampleOpened} timeout="auto" unmountOnExit>
+      <DialogTitle>Scan barcode of sample {props.sample?.name}</DialogTitle>
+      <DialogContent>
+        {videoEl}
+        {videoState === `OK` && (
+          <pre>
+            {barcodeDetected &&
+              JSON.stringify(
+                barcodeDetectResult.detectedBarcodes.map(
+                  ({ format, rawValue }) => ({
+                    format,
+                    rawValue,
+                  })
+                ),
+                null,
+                2
+              )}
+          </pre>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={props.onDismiss}>Close</Button>
+        <Button
+          disabled={!barcodeDetected}
+          onClick={() =>
+            props.onScan(
+              (barcodeDetectResult as any).detectedBarcodes[0].rawValue
+            )
+          }
+        >
+          Scan
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const proofOfDeliveries = new Map<string, string>();
+
+const SamplesList = (props: { items: Sample[] }) => {
+  const barcodeDetectorAPI = useBarcodeDetectorAPI();
+  const videoStream = useVideoStream(320, `environment`);
+  const [pickupSample, setPickupSample] = React.useState<Sample>();
+  const clearPickupSample = () => {
+    videoStream.pauseVideo();
+    setPickupSample(undefined);
+  };
+
+  return (
+    <>
+      <List
+        sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+        subheader={
+          <ListSubheader component="div" id="nested-list-subheader">
+            Pickup Samples
+          </ListSubheader>
+        }
+      >
+        {props.items.map((sample) => {
+          return (
+            <React.Fragment key={sample.id}>
               <List component="div" disablePadding>
-                <ListItemButton sx={{ pl: 4 }}>
-                  <ListItemIcon>
-                    <CheckBoxOutlineBlankIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Proof of delivery" />
-                </ListItemButton>
+                {proofOfDeliveries.has(sample.id) ? (
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <CheckBoxIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={sample.name}
+                      secondary={`Delivered, barcode: ${proofOfDeliveries.get(
+                        sample.id
+                      )}`}
+                    />
+                  </ListItemButton>
+                ) : (
+                  <ListItemButton
+                    sx={{ pl: 4 }}
+                    onClick={() => {
+                      videoStream.startVideo();
+                      setPickupSample(sample);
+                    }}
+                  >
+                    <ListItemIcon>
+                      <CheckBoxOutlineBlankIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={sample.name} />
+                  </ListItemButton>
+                )}
               </List>
-            </Collapse>
-          </React.Fragment>
-        );
-      })}
-    </List>
+            </React.Fragment>
+          );
+        })}
+      </List>
+      {barcodeDetectorAPI &&
+        (`error` in barcodeDetectorAPI ? (
+          <Dialog open={Boolean(pickupSample)} onClose={clearPickupSample}>
+            <DialogTitle>
+              The Barcode scanning is not supported in this browser
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                To proof pickup, we need to scan a barcode. This feature is not
+                supported in this browser. You might test other web browser.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={clearPickupSample}>Close</Button>
+            </DialogActions>
+          </Dialog>
+        ) : (
+          <ProofOfPickupDialog
+            barcodeDetectorAPI={barcodeDetectorAPI}
+            onDismiss={clearPickupSample}
+            onScan={(barcode) => {
+              proofOfDeliveries.set(pickupSample!.id, barcode);
+              clearPickupSample();
+            }}
+            sample={pickupSample}
+            videoStream={videoStream}
+          />
+        ))}
+    </>
   );
 };
 
@@ -256,6 +371,7 @@ const Demo = () => {
   const selectedPoint = manifest.points[hashParam as any];
   const [swipeableDrawerOpen, setSwipeableDrawerOpen] = React.useState(false);
   const [navDrawerOpen, setNavDrawerOpen] = React.useState(false);
+
   return (
     <div className={classes.root}>
       <NavDrawer open={navDrawerOpen} onClose={() => setNavDrawerOpen(false)} />
@@ -276,13 +392,13 @@ const Demo = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Map
+      <GoogleMap
         className={classes.map}
         zoom={17}
         {...(hashParam
           ? {
               // shift the center slightly up to prevent overlay of the point by
-              // SwipeableDrawer - poor hack, do not use
+              // SwipeableDrawer - poor hack, do not use in production ;)
               center: addLat(
                 manifestLatLng[hashParam as any],
                 swipeableDrawerOpen ? -0.0015 : 0
@@ -293,7 +409,7 @@ const Demo = () => {
         {manifestLatLng.map((pointPosition, idx) => (
           <Marker key={idx} position={pointPosition} />
         ))}
-      </Map>
+      </GoogleMap>
       {selectedPoint && (
         <SwipeableDrawer
           drawerBleeding={drawerBleeding}

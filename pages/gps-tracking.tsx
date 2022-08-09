@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { FormattedTime } from "react-intl";
 
 import {
-  Map,
+  GoogleMap,
   Marker,
   Polyline,
   geoPositionToLatLng,
@@ -95,19 +95,19 @@ const ContentPermissionGranted = ({
         <figcaption>
           Your position captured on the page start rendered in a map.
         </figcaption>
-        <Map
+        <GoogleMap
           center={currentLatLng}
           style={{ blockSize: 300, inlineSize: 500 }}
           zoom={10}
         >
           <Marker position={currentLatLng} />
-        </Map>
+        </GoogleMap>
       </figure>
       <h3>Watch for position changes</h3>
 
       <figure>
         <figcaption>You real-time position plotted onto the map</figcaption>
-        <Map
+        <GoogleMap
           center={currentLatLng}
           bounds={latLngsToBounds(latestPositionsLatLngs)}
           style={{ blockSize: 300, inlineSize: 500 }}
@@ -119,7 +119,7 @@ const ContentPermissionGranted = ({
             strokeOpacity={1}
             strokeWeight={2}
           />
-        </Map>
+        </GoogleMap>
       </figure>
       <p>
         The watch callback is invoked even when there is no change in location,

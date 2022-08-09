@@ -1,54 +1,16 @@
-import once from "lodash/once";
-import uniqBy from "lodash/uniqBy";
-import React, { useEffect } from "react";
+import React from "react";
 
 import { LayoutDocs } from "../components/LayoutDocs";
-import listClasses from "../styles/list.module.scss";
-import { fileToImage, useVideoStream } from "../utils/file";
-import classes from "./barcode-scan.module.scss";
 import {
-  BarcodeDetectorAPI,
-  DetectedBarcode,
-  ImageBitmapSource,
-} from "./barcode-scan.d";
-
-const nativeBarcodeDetectorAvailable =
-  typeof window !== `undefined` && `BarcodeDetector` in window;
-
-const getBarcodeDetectorAPI = once(
-  (): Promise<BarcodeDetectorAPI> =>
-    nativeBarcodeDetectorAvailable
-      ? Promise.resolve(window)
-      : import("barcode-detector" as any).then(
-          (barcodeDetectorModule) =>
-            ({
-              BarcodeDetector: barcodeDetectorModule.default,
-            } as any)
-        )
-);
-
-const useBarcodeDetect = (barcodeDetectorAPI: BarcodeDetectorAPI) => {
-  const [barcodeDetectResult, setBarcodeDetectResult] = React.useState<
-    { error: string } | { detectedBarcodes: DetectedBarcode[] } | undefined
-  >();
-  const barcodeDetect = (
-    imageBitmapSource: ImageBitmapSource | Promise<ImageBitmapSource>
-  ) =>
-    Promise.resolve(imageBitmapSource).then((source) =>
-      new barcodeDetectorAPI.BarcodeDetector().detect(source).then(
-        (detectedBarcodes) =>
-          setBarcodeDetectResult({
-            detectedBarcodes: uniqBy(
-              detectedBarcodes,
-              ({ format, rawValue }) => `${format}${rawValue}`
-            ),
-          }),
-        (error) =>
-          setBarcodeDetectResult({ detectedBarcodes: undefined, error })
-      )
-    );
-  return { barcodeDetect, barcodeDetectResult };
-};
+  nativeBarcodeDetectorAvailable,
+  useBarcodeDetect,
+  useBarcodeDetectorAPI,
+} from "../hook/useBarcodeDetectorAPI";
+import { useVideoStream } from "../hook/useVideoStream";
+import listClasses from "../styles/list.module.scss";
+import { BarcodeDetectorAPI } from "../types/BarcodeDetectorAPI";
+import { fileToImage } from "../utils/file";
+import classes from "./barcode-scan.module.scss";
 
 const BarcodeExampleUploadFromFile = ({
   barcodeDetectorAPI,
@@ -119,7 +81,10 @@ const BarcodeExampleLiveStream = ({
 }) => {
   const { barcodeDetect, barcodeDetectResult } =
     useBarcodeDetect(barcodeDetectorAPI);
-  const { startVideo, videoEl, videoRef, videoState } = useVideoStream(320, `environment`);
+  const { startVideo, videoEl, videoRef, videoState } = useVideoStream(
+    320,
+    `environment`
+  );
   React.useEffect(() => {
     if (videoState === `OK` && videoRef.current) {
       const intervalId = window.setInterval(() => {
@@ -127,6 +92,7 @@ const BarcodeExampleLiveStream = ({
       }, 200);
       return () => window.clearInterval(intervalId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoState]);
 
   const buttonAction =
@@ -193,9 +159,6 @@ const BarcodeDetectorExample = ({
   const [supportedFormats, setSupportedFormats] = React.useState<
     readonly string[]
   >([]);
-  const [barcodeDecodeResult, setBarcodeDecodeResult] = React.useState<
-    { error: string } | { detectedBarcodes: DetectedBarcode[] } | undefined
-  >();
   React.useEffect(() => {
     barcodeDetectorAPI.BarcodeDetector.getSupportedFormats().then(
       (formats: string[]) => {
@@ -230,12 +193,7 @@ const BarcodeDetectorExample = ({
 };
 
 export const BarcodeScan = () => {
-  const [barcodeDetectorAPI, setBarcodeDetectorAPI] = React.useState<
-    { error: any } | BarcodeDetectorAPI
-  >();
-  useEffect(() => {
-    getBarcodeDetectorAPI().then(setBarcodeDetectorAPI, (error) => ({ error }));
-  }, []);
+  const barcodeDetectorAPI = useBarcodeDetectorAPI();
 
   return (
     <LayoutDocs>

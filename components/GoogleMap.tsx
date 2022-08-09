@@ -37,7 +37,7 @@ interface MapProps extends google.maps.MapOptions {
   style?: CSSProperties;
 }
 
-export const Map = ({
+export const GoogleMap = ({
   bounds,
   className,
   onClick,

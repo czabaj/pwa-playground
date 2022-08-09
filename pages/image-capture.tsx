@@ -1,7 +1,8 @@
 import { ChangeEvent, ReactElement, useRef } from "react";
 
 import { LayoutDocs } from "../components/LayoutDocs";
-import { fileToImage, getResizedImage, useVideoStream } from "../utils/file";
+import { useVideoStream } from "../hook/useVideoStream";
+import { fileToImage, getResizedImage } from "../utils/file";
 
 const IMAGE_WIDTH = 320;
 
