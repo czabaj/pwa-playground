@@ -46,13 +46,12 @@ import { useVideoStream, VideoStream } from "../hook/useVideoStream";
 import { BarcodeDetectorAPI } from "../types/BarcodeDetectorAPI";
 import classes from "./demo.module.scss";
 import { Manifest, Sample } from "./demo.types";
-import { sample } from "lodash";
 
 let uid = 1;
 const getUID = () => `${uid++}`;
 
 const manifest: Manifest = {
-  name: `Example round`,
+  name: `Driver's manifest`,
   points: [
     {
       // https://www.google.com/maps/place/Texas+MedClinic+Urgent+Care/@30.2185343,-97.8484321,11.59z/data=!4m9!1m2!2m1!1smedical+clinic!3m5!1s0x865b4cd39f7a07c9:0xa15deeaa90aea3a0!8m2!3d30.1543849!4d-97.7921189!15sCg5tZWRpY2FsIGNsaW5pY5IBDm1lZGljYWxfY2xpbmlj
@@ -370,6 +369,9 @@ const Demo = () => {
   const hashParam = useHashParam();
   const selectedPoint = manifest.points[hashParam as any];
   const [swipeableDrawerOpen, setSwipeableDrawerOpen] = React.useState(false);
+  React.useEffect(() => {
+    setSwipeableDrawerOpen(Boolean(selectedPoint));
+  }, [selectedPoint]);
   const [navDrawerOpen, setNavDrawerOpen] = React.useState(false);
 
   return (

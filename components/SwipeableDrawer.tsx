@@ -43,7 +43,6 @@ export const SwipeableDrawer = (props: SwipeableDrawerProps) => {
       anchor="bottom"
       disableSwipeToOpen={false}
       elevation={1}
-      hideBackdrop={true}
       onClose={props.onClose}
       onOpen={props.onOpen}
       open={props.open}
