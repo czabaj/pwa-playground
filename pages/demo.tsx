@@ -218,10 +218,10 @@ const ProofOfPickupDialog = (props: {
   const { barcodeDetect, barcodeDetectResult } = useBarcodeDetect(
     props.barcodeDetectorAPI
   );
-  const barcodeDetected =
-    barcodeDetectResult &&
-    `detectedBarcodes` in barcodeDetectResult &&
-    barcodeDetectResult.detectedBarcodes?.length > 0;
+  const firstDetectedBarcode: string | undefined =
+    barcodeDetectResult && `detectedBarcodes` in barcodeDetectResult
+      ? barcodeDetectResult.detectedBarcodes[0]?.rawValue
+      : undefined;
   const { videoEl, videoRef, videoState } = props.videoStream;
   React.useEffect(() => {
     if (props.sample && videoState === `OK` && videoRef.current) {
@@ -239,34 +239,21 @@ const ProofOfPickupDialog = (props: {
       onClose={props.onDismiss}
       open={Boolean(props.sample)}
     >
-      <DialogTitle>Scan barcode of sample {props.sample?.name}</DialogTitle>
-      <DialogContent>
+      <DialogTitle>Scan barcode of {props.sample?.name}</DialogTitle>
+      <DialogContent className={classes.proofOfPickupContent}>
         {videoEl}
-        {videoState === `OK` && (
-          <pre>
-            {barcodeDetected &&
-              JSON.stringify(
-                barcodeDetectResult.detectedBarcodes.map(
-                  ({ format, rawValue }) => ({
-                    format,
-                    rawValue,
-                  })
-                ),
-                null,
-                2
-              )}
-          </pre>
-        )}
+        <div
+          data-detected={Boolean(firstDetectedBarcode)}
+          className={classes.detectedBarcode}
+        >
+          {firstDetectedBarcode || `None detected`}
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={props.onDismiss}>Close</Button>
         <Button
-          disabled={!barcodeDetected}
-          onClick={() =>
-            props.onScan(
-              (barcodeDetectResult as any).detectedBarcodes[0].rawValue
-            )
-          }
+          disabled={!firstDetectedBarcode}
+          onClick={() => props.onScan(firstDetectedBarcode!)}
         >
           Scan
         </Button>
@@ -279,7 +266,15 @@ const proofOfDeliveries = new Map<string, string>();
 
 const SamplesList = (props: { items: Sample[] }) => {
   const barcodeDetectorAPI = useBarcodeDetectorAPI();
-  const videoStream = useVideoStream(320, `environment`);
+  const videoStream = useVideoStream(
+    Math.min(
+      320,
+      typeof window === `undefined`
+        ? Number.POSITIVE_INFINITY
+        : Math.trunc(window.innerWidth * 0.7)
+    ),
+    `environment`
+  );
   const [pickupSample, setPickupSample] = React.useState<Sample>();
   const clearPickupSample = () => {
     videoStream.pauseVideo();

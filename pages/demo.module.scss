@@ -7,3 +7,28 @@
 .map {
   flex-grow: 1;
 }
+
+.proofOfPickupContent {
+  position: relative;
+
+  .detectedBarcode {
+    background-color: hsl(210, 14%, 89%);
+    border-radius: 1e5px;
+    inset-block-end: 1.5rem;
+    inset-inline-start: 50%;
+    line-height: 2;
+    margin-inline: auto;
+    max-inline-size: 80%;
+    overflow: hidden;
+    padding-inline: 1ch;
+    position: absolute;
+    text-overflow: ellipsis;
+    transform: translateX(-50%);
+    white-space: nowrap;
+
+    &[data-detected="true"] {
+      background-color: hsl(131, 50%, 50%);
+      color: white;
+    }
+  }
+}
