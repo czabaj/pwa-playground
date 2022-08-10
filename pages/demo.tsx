@@ -22,6 +22,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import PlaceIcon from "@mui/icons-material/Place";
+import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import React from "react";
@@ -64,7 +65,6 @@ const manifest: Manifest = {
           id: getUID(),
           name: `Sample 2`,
         },
-        { id: getUID(), name: `Sample 3` },
       ],
     },
     // https://www.google.com/maps/place/CommUnityCare:+Hancock+Walk-In+Care/@30.2185343,-97.8484321,11.59z/data=!4m9!1m2!2m1!1smedical+clinic!3m5!1s0x8644ca100a302fd1:0xbd37f0344afa07bf!8m2!3d30.2999081!4d-97.7173376!15sCg5tZWRpY2FsIGNsaW5pY5IBDm1lZGljYWxfY2xpbmlj
@@ -72,29 +72,14 @@ const manifest: Manifest = {
       address: `1000 E 41st St Ste 925, Austin, TX 78751, United States`,
       location: { latitude: 30.300015906935606, longitude: -97.71746991416332 },
       name: `CommUnityCare: Hancock Walk-In Care`,
-      itemsTake: [
-        { id: getUID(), name: `Sample 1` },
-        {
-          id: getUID(),
-          name: `Sample 2`,
-        },
-        { id: getUID(), name: `Sample 3` },
-      ],
+      itemsTake: [{ id: getUID(), name: `Sample 3` }],
     },
     // https://www.google.com/maps/place/Thrive+Medical+Clinic/@30.3159419,-97.774961,12z/data=!4m9!1m2!2m1!1smedical+clinic!3m5!1s0x8644cdede707bcaf:0x97709b8943e460b9!8m2!3d30.4079023!4d-97.7039959!15sCg5tZWRpY2FsIGNsaW5pY5IBGWZhbWlseV9wcmFjdGljZV9waHlzaWNpYW4
     {
       address: `2217 Park Bend Dr Suite #210, Austin, TX 78758, United States`,
-
       location: { latitude: 30.411805655976455, longitude: -97.70530677228606 },
       name: `Thrive Medical Clinic`,
-      itemsTake: [
-        { id: getUID(), name: `Sample 1` },
-        {
-          id: getUID(),
-          name: `Sample 2`,
-        },
-        { id: getUID(), name: `Sample 3` },
-      ],
+      itemsGive: [{ id: getUID(), name: `Sample 4` }],
     },
   ],
 };
@@ -262,9 +247,9 @@ const ProofOfPickupDialog = (props: {
   );
 };
 
-const proofOfDeliveries = new Map<string, string>();
+const proofOfPickups = new Map<string, string>();
 
-const SamplesList = (props: { items: Sample[] }) => {
+const PickupSampleList = (props: { items: Sample[] }) => {
   const barcodeDetectorAPI = useBarcodeDetectorAPI();
   const videoStream = useVideoStream(
     Math.min(
@@ -286,27 +271,25 @@ const SamplesList = (props: { items: Sample[] }) => {
       <List
         sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
         subheader={
-          <ListSubheader component="div" id="nested-list-subheader">
-            Pickup Samples
-          </ListSubheader>
+          <ListSubheader component="div">Pickup Samples</ListSubheader>
         }
       >
         {props.items.map((sample) => {
           return (
             <React.Fragment key={sample.id}>
               <List component="div" disablePadding>
-                {proofOfDeliveries.has(sample.id) ? (
-                  <ListItemButton sx={{ pl: 4 }}>
+                {proofOfPickups.has(sample.id) ? (
+                  <ListItem sx={{ pl: 4 }}>
                     <ListItemIcon>
                       <CheckBoxIcon />
                     </ListItemIcon>
                     <ListItemText
                       primary={sample.name}
-                      secondary={`Delivered, barcode: ${proofOfDeliveries.get(
+                      secondary={`Obtained, barcode: ${proofOfPickups.get(
                         sample.id
                       )}`}
                     />
-                  </ListItemButton>
+                  </ListItem>
                 ) : (
                   <ListItemButton
                     sx={{ pl: 4 }}
@@ -347,7 +330,7 @@ const SamplesList = (props: { items: Sample[] }) => {
             barcodeDetectorAPI={barcodeDetectorAPI}
             onDismiss={clearPickupSample}
             onScan={(barcode) => {
-              proofOfDeliveries.set(pickupSample!.id, barcode);
+              proofOfPickups.set(pickupSample!.id, barcode);
               clearPickupSample();
             }}
             sample={pickupSample}
@@ -358,7 +341,93 @@ const SamplesList = (props: { items: Sample[] }) => {
   );
 };
 
-const drawerBleeding = 56;
+const proofOfDeliveries = new Map<string, string>();
+
+const DeliverSampleList = (props: { items: Sample[] }) => {
+  const [deliverSample, setDeliverSample] = React.useState<Sample>();
+  const clearDeliverSample = () => {
+    setDeliverSample(undefined);
+  };
+
+  return (
+    <>
+      <List
+        sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+        subheader={
+          <ListSubheader component="div">Deliver Samples</ListSubheader>
+        }
+      >
+        {props.items.map((sample) => {
+          return (
+            <React.Fragment key={sample.id}>
+              <List component="div" disablePadding>
+                {proofOfDeliveries.has(sample.id) ? (
+                  <ListItem sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <CheckBoxIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={sample.name}
+                      secondary={`Accepted by: ${proofOfDeliveries.get(
+                        sample.id
+                      )}`}
+                    />
+                  </ListItem>
+                ) : (
+                  <ListItemButton
+                    sx={{ pl: 4 }}
+                    onClick={() => {
+                      setDeliverSample(sample);
+                    }}
+                  >
+                    <ListItemIcon>
+                      <CheckBoxOutlineBlankIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={sample.name} />
+                  </ListItemButton>
+                )}
+              </List>
+            </React.Fragment>
+          );
+        })}
+      </List>
+      {deliverSample && (
+        <Dialog open={true} onClose={clearDeliverSample}>
+          <DialogTitle>Deliver {deliverSample.name}</DialogTitle>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const acceptedBy: string = (
+                (event.target as HTMLFormElement).elements[
+                  `acceptedBy` as any
+                ] as HTMLInputElement
+              ).value;
+              proofOfDeliveries.set(deliverSample.id, acceptedBy);
+              clearDeliverSample();
+            }}
+          >
+            <DialogContent>
+              <DialogContentText>
+                <TextField
+                  label="Name of recipient"
+                  name="acceptedBy"
+                  required
+                  variant="standard"
+                />
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={clearDeliverSample}>Close</Button>
+              <Button type="submit">Submit</Button>
+            </DialogActions>
+          </form>
+        </Dialog>
+      )}
+    </>
+  );
+};
+
+const DRAWER_BLEEDING = 56;
 
 const Demo = () => {
   const hashParam = useHashParam();
@@ -409,13 +478,18 @@ const Demo = () => {
       </GoogleMap>
       {selectedPoint && (
         <SwipeableDrawer
-          drawerBleeding={drawerBleeding}
+          drawerBleeding={DRAWER_BLEEDING}
           heading={selectedPoint.name}
           open={swipeableDrawerOpen}
           onClose={() => setSwipeableDrawerOpen(false)}
           onOpen={() => setSwipeableDrawerOpen(true)}
         >
-          <SamplesList items={selectedPoint.itemsTake} />
+          {selectedPoint.itemsTake && (
+            <PickupSampleList items={selectedPoint.itemsTake} />
+          )}
+          {selectedPoint.itemsGive && (
+            <DeliverSampleList items={selectedPoint.itemsGive} />
+          )}
         </SwipeableDrawer>
       )}
     </div>

@@ -7,7 +7,7 @@ export type Point = {
   address: string;
   location: Pick<GeolocationCoordinates, `latitude` | `longitude`>;
   name: string;
-  itemsTake: Sample[];
+  itemsTake?: Sample[];
   itemsGive?: Sample[];
 };
 
